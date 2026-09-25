@@ -1,0 +1,21 @@
+<main class="contenedor">
+
+  <h2>Pedidos</h2>
+
+  <p>
+    Esta es una sección protegida. Para acceder, el usuario debe estar autenticado.
+  </p>
+
+  <button type="button" (click)="consultarApi()">
+    Consultar pedidos
+  </button>
+
+  <div *ngIf="datosApi">
+
+    <h3>Respuesta de la API</h3>
+
+    <p>{{ datosApi.mensaje }}</p>
+
+  </div>
+
+</main>

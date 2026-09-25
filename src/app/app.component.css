@@ -1,0 +1,86 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #f5efe6;
+  font-family: Arial, sans-serif;
+  color: #4e4035;
+}
+
+.contenedor {
+  width: 90%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 38px;
+  margin-bottom: 8px;
+  color: #6b5746;
+}
+
+.contenedor > p {
+  color: #8a7563;
+  margin-bottom: 35px;
+}
+
+.contenedor > div {
+  background-color: #fffaf3;
+  padding: 35px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(90, 70, 50, 0.12);
+  border: 1px solid #e5d6c5;
+}
+
+h2 {
+  color: #6b5746;
+  margin-top: 0;
+}
+
+h3 {
+  color: #6b5746;
+  margin-top: 25px;
+}
+
+strong {
+  display: block;
+  margin: 10px 0 25px;
+  color: #705c4b;
+}
+
+button {
+  background-color: #b89b7a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 11px 20px;
+  margin: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #9c7f61;
+}
+
+@media (max-width: 600px) {
+  .contenedor {
+    width: auto;
+    padding: 30px 15px;
+  }
+
+  .contenedor > div {
+    padding: 25px 15px;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+
+  button {
+    width: 100%;
+    margin: 6px 0;
+  }
+}

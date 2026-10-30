@@ -1,77 +1,533 @@
-<main class="contenedor">
 
-  <h1>Pedidos360</h1>
-  <p>Gestión de pedidos</p>
-
-  <div *ngIf="!usuario">
-
-    <p>Para acceder al sistema debes iniciar sesión.</p>
-
-    <button type="button" (click)="iniciarSesion()">
-      Iniciar sesión con Microsoft
+<div class="tienda">
+  <header class="cabecera">
+    <button class="marca" (click)="irA('inicio')">
+      Pedidos<span>360</span>
+      <small>HOGAR & DECORACIÓN</small>
     </button>
 
-  </div>
+    <nav class="navegacion">
+      <button (click)="irA('inicio')">Inicio</button>
+      <button (click)="irA('productos')">Productos</button>
+      <button (click)="irA('cuenta')">Mis pedidos</button>
+    </nav>
 
-  <div *ngIf="usuario">
-
-    <h2>Bienvenida</h2>
-
-    <p>Usuario autenticado:</p>
-    <strong>{{ usuario }}</strong>
-
-    <br><br>
-
-    <button type="button" (click)="consultarApi()">
-      Consultar pedidos
-    </button>
-
-    <div *ngIf="datosApi">
-
-      <h3>Respuesta de Pedidos</h3>
-
-      <p>{{ datosApi.mensaje }}</p>
-
-      <div *ngFor="let pedido of datosApi.pedidos">
-        <p>
-          Pedido #{{ pedido.id }} -
-          {{ pedido.producto }} -
-          {{ pedido.estado }}
-        </p>
-      </div>
-
+    <div class="acciones">
+      <button class="carrito-boton" (click)="irA('carrito')">
+        🛒 Carrito <span class="contador">{{ cantidadCarrito }}</span>
+      </button>
+      <button *ngIf="!usuario" class="boton primario" (click)="iniciarSesion()">
+        Iniciar sesión
+      </button>
+      <button *ngIf="usuario" class="boton primario" (click)="irA('cuenta')">
+        Mi cuenta
+      </button>
     </div>
+  </header>
 
-    <br><br>
+  <main>
+    <section *ngIf="vista === 'inicio'" class="hero">
+      <div>
+        <span class="etiqueta">COLECCIÓN HOGAR</span>
+        <h1>Haz de tu casa<br>tu lugar favorito.</h1>
+        <p>Encuentra detalles para renovar cada rincón de tu hogar.</p>
+        <button class="boton primario" (click)="irA('productos')">
+          Explorar productos →
+        </button>
+      </div>
+      <div
+        class="hero-foto"
+        role="img"
+        aria-label="Sala de estar decorada con muebles y plantas"
+      ></div>
+    </section>
 
-    <button type="button" (click)="consultarProductos()">
-      Consultar productos
-    </button>
-
-    <div *ngIf="productos">
-
-      <h3>Productos</h3>
-
-      <div *ngFor="let producto of productos">
-        <p>
-          Producto #{{ producto.id }} -
-          {{ producto.nombre }} -
-          ${{ producto.precio }}
-        </p>
+    <section *ngIf="vista === 'inicio' || vista === 'productos'" class="seccion">
+      <div class="seccion-titulo">
+        <div>
+          <span class="etiqueta">SELECCIÓN ESPECIAL</span>
+          <h2>
+            {{ vista === 'inicio' ? 'Productos destacados' : 'Todos nuestros productos' }}
+          </h2>
+        </div>
+        <button *ngIf="vista === 'inicio'" class="enlace" (click)="irA('productos')">
+          Ver todos →
+        </button>
       </div>
 
-      <p *ngIf="productos.length === 0">
-        No hay productos registrados.
+      <div *ngIf="vista === 'productos'" class="buscador-panel">
+        <div class="barra-busqueda">
+          <span class="lupa" aria-hidden="true">⌕</span>
+          <input
+            type="search"
+            [(ngModel)]="busqueda"
+            placeholder="Buscar lámparas, cojines, decoración..."
+            aria-label="Buscar productos"
+          >
+          <button
+            *ngIf="busqueda"
+            class="limpiar-texto"
+            (click)="busqueda = ''"
+            aria-label="Borrar búsqueda"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="selector-contenedor">
+          <button
+            class="selector-categoria"
+            (click)="mostrarCategorias = !mostrarCategorias"
+            [attr.aria-expanded]="mostrarCategorias"
+            aria-label="Seleccionar categoría"
+          >
+            {{ categoriaSeleccionada }}
+            <span aria-hidden="true">⌄</span>
+          </button>
+
+          <div *ngIf="mostrarCategorias" class="menu-categorias">
+            <button
+              *ngFor="let categoria of categorias"
+              (click)="seleccionarCategoria(categoria)"
+              [class.seleccionada]="categoriaSeleccionada === categoria"
+            >
+              {{ categoria }}
+            </button>
+          </div>
+        </div>
+
+        <button
+          *ngIf="busqueda || categoriaSeleccionada !== 'Todas'"
+          class="boton-limpiar"
+          (click)="limpiarFiltros()"
+        >
+          Limpiar filtros
+        </button>
+      </div>
+
+      <p *ngIf="vista === 'productos'" class="contador-resultados">
+        {{ catalogoFiltrado.length }}
+        {{ catalogoFiltrado.length === 1 ? 'producto encontrado' : 'productos encontrados' }}
       </p>
 
+      <div class="productos-grid">
+        <article
+          class="producto"
+          *ngFor="let producto of (vista === 'inicio' ? catalogo : catalogoFiltrado)"
+        >
+          <img
+            class="producto-imagen"
+            [src]="producto.imagen"
+            [alt]="producto.nombre"
+            loading="lazy"
+          >
+
+          <div class="producto-info">
+            <span class="categoria">{{ producto.categoria }}</span>
+            <h3>{{ producto.nombre }}</h3>
+            <p>{{ producto.descripcion }}</p>
+
+            <div class="producto-pie">
+              <strong>
+                {{ producto.precio | currency:'CLP':'symbol-narrow':'1.0-0':'es-CL' }}
+              </strong>
+              <button class="boton primario" (click)="agregarAlCarrito(producto)">
+                + Agregar
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div
+        *ngIf="vista === 'productos' && catalogoFiltrado.length === 0"
+        class="sin-resultados"
+      >
+        <h3>No encontramos productos</h3>
+        <p>Prueba otra búsqueda o selecciona una categoría diferente.</p>
+        <button class="boton primario" (click)="limpiarFiltros()">
+          Mostrar todos los productos
+        </button>
+      </div>
+    </section>
+
+    <section *ngIf="vista === 'carrito'" class="seccion carrito-pagina">
+      <div class="carrito-encabezado">
+        <span class="etiqueta">TU COMPRA</span>
+        <h2>Mi carrito de compras</h2>
+        <p>Revisa los productos que agregaste antes de continuar.</p>
+      </div>
+
+      <div *ngIf="carrito.length === 0" class="carrito-vacio">
+        <div class="carrito-vacio-icono">🛒</div>
+        <h3>Tu carrito está vacío</h3>
+        <p>Descubre nuestros productos para el hogar y encuentra algo especial.</p>
+        <button class="boton primario" (click)="irA('productos')">
+          Explorar productos →
+        </button>
+      </div>
+
+      <div *ngIf="carrito.length > 0" class="carrito-layout">
+        <div class="carrito-listado">
+          <div class="carrito-listado-titulo">
+            <h3>Productos seleccionados</h3>
+            <span>
+              {{ cantidadCarrito }}
+              {{ cantidadCarrito === 1 ? 'artículo' : 'artículos' }}
+            </span>
+          </div>
+
+          <article *ngFor="let item of carrito" class="carrito-producto">
+            <div class="carrito-imagen-contenedor">
+              <img
+                class="carrito-imagen"
+                [src]="obtenerProducto(item.id)?.imagen"
+                [alt]="item.nombre"
+              >
+            </div>
+
+            <div class="carrito-detalles">
+              <span class="categoria">
+                {{ obtenerProducto(item.id)?.categoria }}
+              </span>
+
+              <h3>{{ item.nombre }}</h3>
+
+              <p class="carrito-descripcion">
+                {{ obtenerProducto(item.id)?.descripcion }}
+              </p>
+
+              <strong class="carrito-precio">
+                {{ item.precio | currency:'CLP':'symbol-narrow':'1.0-0':'es-CL' }}
+              </strong>
+
+              <div class="carrito-controles">
+                <div class="carrito-cantidad">
+                  <button
+                    (click)="cambiarCantidad(item.id, -1)"
+                    aria-label="Disminuir cantidad"
+                  >
+                    −
+                  </button>
+
+                  <span>{{ item.cantidad }}</span>
+
+                  <button
+                    (click)="cambiarCantidad(item.id, 1)"
+                    aria-label="Aumentar cantidad"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <button
+                  class="carrito-eliminar"
+                  (click)="eliminarProducto(item.id)"
+                >
+                  Eliminar
+                </button>
+              </div>
+
+              <div class="carrito-subtotal">
+                <span>Subtotal</span>
+                <strong>
+                  {{ item.precio * item.cantidad | currency:'CLP':'symbol-narrow':'1.0-0':'es-CL' }}
+                </strong>
+              </div>
+            </div>
+          </article>
+
+          <button
+            class="boton secundario seguir-comprando"
+            (click)="irA('productos')"
+          >
+            ← Seguir comprando
+          </button>
+        </div>
+
+        <aside class="carrito-lateral">
+          <div class="resumen-compra">
+            <h3>Resumen de compra</h3>
+
+            <div class="resumen-linea">
+              <span>Productos ({{ cantidadCarrito }})</span>
+              <strong>
+                {{ totalCarrito | currency:'CLP':'symbol-narrow':'1.0-0':'es-CL' }}
+              </strong>
+            </div>
+
+            <div class="resumen-linea">
+              <span>Envío</span>
+              <span>Por calcular</span>
+            </div>
+
+            <div class="resumen-total">
+              <span>Subtotal</span>
+              <strong>
+                {{ totalCarrito | currency:'CLP':'symbol-narrow':'1.0-0':'es-CL' }}
+              </strong>
+            </div>
+
+            <button
+              class="boton primario finalizar-boton"
+              (click)="confirmarPedido()"
+              [disabled]="confirmandoPedido || carrito.length === 0"
+            >
+              {{ confirmandoPedido ? 'Registrando pedido...' : 'Confirmar pedido →' }}
+            </button>
+
+            <p class="aviso-demo">
+              Inicia sesión con Microsoft para registrar tu compra. El envío y el pago no están incluidos.
+            </p>
+
+            <p
+              *ngIf="mensajePedido"
+              role="status"
+              [class.error]="!mensajePedido.includes('correctamente')"
+            >
+              {{ mensajePedido }}
+            </p>
+
+            <button class="vaciar-carrito" (click)="vaciarCarrito()">
+              Vaciar carrito
+            </button>
+          </div>
+
+          <div class="beneficios-compra">
+            <div class="beneficio">
+              <span class="beneficio-icono">🚚</span>
+              <div>
+                <strong>Despachos</strong>
+                <p>Opciones de envío disponibles próximamente.</p>
+              </div>
+            </div>
+
+            <div class="beneficio">
+              <span class="beneficio-icono">🔒</span>
+              <div>
+                <strong>Acceso seguro</strong>
+                <p>Autenticación de usuarios con Microsoft.</p>
+              </div>
+            </div>
+
+            <div class="beneficio">
+              <span class="beneficio-icono">💬</span>
+              <div>
+                <strong>¿Necesitas ayuda?</strong>
+                <p>Visita nuestros canales de contacto.</p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section *ngIf="vista === 'cuenta'" class="seccion estrecha">
+      <h2>Mi cuenta y pedidos</h2>
+
+      <p
+        *ngIf="mensajePedido"
+        role="status"
+        [class.error]="!mensajePedido.includes('correctamente')"
+      >
+        {{ mensajePedido }}
+      </p>
+
+      <div *ngIf="!usuario" class="panel">
+        <p>
+          Inicia sesión con Microsoft para consultar tus pedidos
+          y el catálogo del sistema.
+        </p>
+        <button class="boton primario" (click)="iniciarSesion()">
+          Iniciar sesión con Microsoft
+        </button>
+      </div>
+
+      <div *ngIf="usuario" class="panel">
+        <div class="perfil">
+          <div>
+            <span class="avatar">{{ usuario.charAt(0).toUpperCase() }}</span>
+            <div>
+              <strong>{{ usuario }}</strong>
+              <p>Cuenta conectada con Microsoft</p>
+            </div>
+          </div>
+
+          <button class="boton secundario" (click)="cerrarSesion()">
+            Cerrar sesión
+          </button>
+        </div>
+
+        <div class="pestanas">
+          <button
+            [class.activo]="seccionCuenta === 'pedidos'"
+            (click)="seccionCuenta = 'pedidos'; consultarApi()"
+          >
+            Ver mis pedidos
+          </button>
+
+          <button
+            [class.activo]="seccionCuenta === 'catalogo'"
+            (click)="seccionCuenta = 'catalogo'; consultarProductos()"
+          >
+            Consultar catálogo
+          </button>
+        </div>
+
+        <div *ngIf="seccionCuenta === 'pedidos'" class="resultado">
+          <h3>Historial de pedidos</h3>
+
+          <p *ngIf="!datosApi && !cargandoPedidos && !errorPedidos">
+            Presiona «Ver mis pedidos» para consultar tus pedidos registrados.
+          </p>
+
+          <p *ngIf="cargandoPedidos">Consultando pedidos...</p>
+
+          <p *ngIf="errorPedidos" class="error" role="alert">
+            {{ errorPedidos }}
+          </p>
+
+          <div *ngIf="datosApi && !cargandoPedidos">
+            <p *ngIf="datosApi.mensaje">{{ datosApi.mensaje }}</p>
+
+            <div class="tabla-scroll">
+              <table *ngIf="listaPedidos.length">
+                <thead>
+                  <tr>
+                    <th>N.º pedido</th>
+                    <th>Producto</th>
+                    <th>Estado</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let pedido of listaPedidos">
+                    <td>{{ pedido.id ?? pedido.numero ?? '—' }}</td>
+                    <td>{{ pedido.producto ?? pedido.nombre ?? '—' }}</td>
+                    <td>{{ pedido.estado ?? '—' }}</td>
+                    <td>
+                      {{ pedido.total != null ? (pedido.total | currency:'CLP':'symbol-narrow':'1.0-0':'es-CL') : '—' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p *ngIf="!listaPedidos.length">
+              Todavía no tienes pedidos registrados.
+            </p>
+          </div>
+        </div>
+
+        <div *ngIf="seccionCuenta === 'catalogo'" class="resultado">
+          <h3>Catálogo registrado en el sistema</h3>
+
+          <p *ngIf="!productos && !cargandoProductos && !errorProductos">
+            Presiona «Consultar catálogo» para consultar los productos del servidor.
+          </p>
+
+          <p *ngIf="cargandoProductos">Consultando productos...</p>
+
+          <p *ngIf="errorProductos" class="error" role="alert">
+            {{ errorProductos }}
+          </p>
+
+          <div *ngIf="productos && !cargandoProductos">
+            <div class="tabla-scroll">
+              <table *ngIf="listaProductosApi.length">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let producto of listaProductosApi">
+                    <td>{{ producto.id ?? '—' }}</td>
+                    <td>{{ producto.nombre ?? '—' }}</td>
+                    <td>
+                      {{ producto.precio != null ? (producto.precio | currency:'CLP':'symbol-narrow':'1.0-0':'es-CL') : '—' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p *ngIf="!listaProductosApi.length">
+              El servidor no devolvió una lista de productos.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-tienda">
+    <div class="footer-contenido">
+      <div class="footer-columna footer-marca">
+        <h3>Pedidos<span>360</span></h3>
+        <span class="footer-subtitulo">HOGAR & DECORACIÓN</span>
+        <p>
+          Transformamos espacios en lugares especiales.
+          Descubre inspiración, estilo y detalles para cada rincón de tu hogar.
+        </p>
+      </div>
+
+      <div class="footer-columna">
+        <h4>Enlaces rápidos</h4>
+        <button (click)="irA('inicio')">Inicio</button>
+        <button (click)="irA('productos')">Nuestros productos</button>
+        <button (click)="irA('carrito')">Mi carrito</button>
+        <button (click)="irA('cuenta')">Mi cuenta y pedidos</button>
+      </div>
+
+      <div class="footer-columna">
+        <h4 class="footer-horario-titulo">Horario de atención</h4>
+        <p>Lunes a viernes: 9:00 - 18:00 hrs</p>
+        <p>Sábados: 10:00 - 14:00 hrs</p>
+      </div>
+
+      <div class="footer-columna">
+        <h4>Contáctanos</h4>
+        <p>Estamos aquí para ayudarte.</p>
+
+        <div class="footer-redes">
+          <a
+            href="https://web.whatsapp.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="footer-red-social"
+            aria-label="Abrir WhatsApp Web"
+          >
+            <img
+              src="https://cdn.jsdelivr.net/npm/simple-icons@v15/icons/whatsapp.svg"
+              alt="WhatsApp"
+              class="icono-red"
+            >
+            WhatsApp
+          </a>
+
+          <a
+            href="https://www.instagram.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="footer-red-social"
+            aria-label="Abrir Instagram"
+          >
+            <img
+              src="https://cdn.jsdelivr.net/npm/simple-icons@v15/icons/instagram.svg"
+              alt="Instagram"
+              class="icono-red"
+            >
+            Instagram
+          </a>
+        </div>
+      </div>
     </div>
 
-    <br><br>
-
-    <button type="button" (click)="cerrarSesion()">
-      Cerrar sesión
-    </button>
-
-  </div>
-
-</main>
+    <div class="footer-inferior">
+      <p>Hogar & Decoración · Diseñado para inspirar</p>
+    </div>
+  </footer>
+</div>

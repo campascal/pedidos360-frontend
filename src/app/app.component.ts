@@ -23,6 +23,21 @@ export class AppComponent implements OnInit {
 
   usuario: string | null = null
   accessToken: string | null = null
+  esAdmin = false
+
+  productoFormulario = {
+    nombre: '',
+    precio: 0,
+    categoria: 'Decoración',
+    descripcion: '',
+    imagen: ''
+  }
+
+  productoEditandoId: number | null = null
+  guardandoProducto = false
+  mensajeAdmin = ''
+  errorAdmin = ''
+
 
   datosApi: any = null
   productos: any = null
@@ -44,7 +59,9 @@ export class AppComponent implements OnInit {
   busqueda = ''
   mostrarCategorias = false
 
-  vista: 'inicio' | 'productos' | 'carrito' | 'cuenta' = 'inicio'
+
+  vista: 'inicio' | 'productos' | 'carrito' | 'cuenta' | 'admin' = 'inicio'
+
 
   carrito: {
     id: number
@@ -313,10 +330,14 @@ export class AppComponent implements OnInit {
     }
   }
 
-  irA(vista: 'inicio' | 'productos' | 'carrito' | 'cuenta'): void {
+
+  irA(vista: 'inicio' | 'productos' | 'carrito' | 'cuenta' | 'admin'): void {
+    if (vista === 'admin' && !this.esAdmin) return
+
     this.vista = vista
     this.mostrarCategorias = false
   }
+
 
   constructor(
     private authService: MsalService,
@@ -367,6 +388,9 @@ export class AppComponent implements OnInit {
         console.log('ISS DEL TOKEN:', payload.iss)
         console.log('AUD DEL TOKEN:', payload.aud)
         console.log('SCOPE DEL TOKEN:', payload.scp)
+        console.log('ROLES DEL TOKEN:', payload.roles)
+        this.esAdmin = Array.isArray(payload.roles) && payload.roles.includes('ADMIN')
+
 
       } catch (error) {
         console.error(
@@ -432,6 +456,88 @@ export class AppComponent implements OnInit {
       }
     })
   }
+
+  guardarProductoAdmin(): void {
+    if (!this.esAdmin || this.guardandoProducto) return
+
+    const producto = {
+      ...this.productoFormulario,
+      nombre: this.productoFormulario.nombre.trim(),
+      descripcion: this.productoFormulario.descripcion.trim(),
+      imagen: this.productoFormulario.imagen.trim()
+    }
+
+    if (!producto.nombre || !producto.categoria || producto.precio <= 0) {
+      this.errorAdmin = 'Completa el nombre, categoría y un precio válido.'
+      return
+    }
+
+    this.guardandoProducto = true
+    this.errorAdmin = ''
+    this.mensajeAdmin = ''
+
+    const solicitud = this.productoEditandoId === null
+      ? this.apiService.agregarProducto(producto)
+      : this.apiService.actualizarProducto(this.productoEditandoId, producto)
+
+    solicitud.subscribe({
+      next: () => {
+        this.guardandoProducto = false
+        this.mensajeAdmin = 'Producto guardado correctamente.'
+        this.cancelarEdicionAdmin()
+        this.consultarProductos()
+      },
+      error: error => {
+        this.guardandoProducto = false
+        this.errorAdmin = this.mensajeError(error)
+      }
+    })
+  }
+
+  editarProductoAdmin(producto: any): void {
+    if (!this.esAdmin) return
+
+    this.productoEditandoId = producto.id
+    this.productoFormulario = {
+      nombre: producto.nombre ?? '',
+      precio: producto.precio ?? 0,
+      categoria: producto.categoria ?? 'Decoración',
+      descripcion: producto.descripcion ?? '',
+      imagen: producto.imagen ?? ''
+    }
+
+    this.mensajeAdmin = ''
+    this.errorAdmin = ''
+  }
+
+  eliminarProductoAdmin(id: number): void {
+    if (!this.esAdmin || !confirm('¿Deseas eliminar este producto?')) return
+
+    this.errorAdmin = ''
+    this.mensajeAdmin = ''
+
+    this.apiService.eliminarProductoAdmin(id).subscribe({
+      next: () => {
+        this.mensajeAdmin = 'Producto eliminado correctamente.'
+        this.consultarProductos()
+      },
+      error: error => {
+        this.errorAdmin = this.mensajeError(error)
+      }
+    })
+  }
+
+  cancelarEdicionAdmin(): void {
+    this.productoEditandoId = null
+    this.productoFormulario = {
+      nombre: '',
+      precio: 0,
+      categoria: 'Decoración',
+      descripcion: '',
+      imagen: ''
+    }
+  }
+
 
   mensajeError(error: any): string {
     if (error.status === 0) {

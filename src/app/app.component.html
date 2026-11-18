@@ -1,4 +1,3 @@
-
 <div class="tienda">
   <header class="cabecera">
     <button class="marca" (click)="irA('inicio')">
@@ -10,6 +9,7 @@
       <button (click)="irA('inicio')">Inicio</button>
       <button (click)="irA('productos')">Productos</button>
       <button (click)="irA('cuenta')">Mis pedidos</button>
+      <button *ngIf="esAdmin" (click)="irA('admin')">Administración</button>
     </nav>
 
     <div class="acciones">
@@ -35,11 +35,7 @@
           Explorar productos →
         </button>
       </div>
-      <div
-        class="hero-foto"
-        role="img"
-        aria-label="Sala de estar decorada con muebles y plantas"
-      ></div>
+      <div class="hero-foto" role="img" aria-label="Sala de estar decorada con muebles y plantas"></div>
     </section>
 
     <section *ngIf="vista === 'inicio' || vista === 'productos'" class="seccion">
@@ -58,49 +54,29 @@
       <div *ngIf="vista === 'productos'" class="buscador-panel">
         <div class="barra-busqueda">
           <span class="lupa" aria-hidden="true">⌕</span>
-          <input
-            type="search"
-            [(ngModel)]="busqueda"
-            placeholder="Buscar lámparas, cojines, decoración..."
-            aria-label="Buscar productos"
-          >
-          <button
-            *ngIf="busqueda"
-            class="limpiar-texto"
-            (click)="busqueda = ''"
-            aria-label="Borrar búsqueda"
-          >
+          <input type="search" [(ngModel)]="busqueda" placeholder="Buscar lámparas, cojines, decoración..."
+            aria-label="Buscar productos">
+          <button *ngIf="busqueda" class="limpiar-texto" (click)="busqueda = ''" aria-label="Borrar búsqueda">
             ×
           </button>
         </div>
 
         <div class="selector-contenedor">
-          <button
-            class="selector-categoria"
-            (click)="mostrarCategorias = !mostrarCategorias"
-            [attr.aria-expanded]="mostrarCategorias"
-            aria-label="Seleccionar categoría"
-          >
+          <button class="selector-categoria" (click)="mostrarCategorias = !mostrarCategorias"
+            [attr.aria-expanded]="mostrarCategorias" aria-label="Seleccionar categoría">
             {{ categoriaSeleccionada }}
             <span aria-hidden="true">⌄</span>
           </button>
 
           <div *ngIf="mostrarCategorias" class="menu-categorias">
-            <button
-              *ngFor="let categoria of categorias"
-              (click)="seleccionarCategoria(categoria)"
-              [class.seleccionada]="categoriaSeleccionada === categoria"
-            >
+            <button *ngFor="let categoria of categorias" (click)="seleccionarCategoria(categoria)"
+              [class.seleccionada]="categoriaSeleccionada === categoria">
               {{ categoria }}
             </button>
           </div>
         </div>
 
-        <button
-          *ngIf="busqueda || categoriaSeleccionada !== 'Todas'"
-          class="boton-limpiar"
-          (click)="limpiarFiltros()"
-        >
+        <button *ngIf="busqueda || categoriaSeleccionada !== 'Todas'" class="boton-limpiar" (click)="limpiarFiltros()">
           Limpiar filtros
         </button>
       </div>
@@ -111,16 +87,8 @@
       </p>
 
       <div class="productos-grid">
-        <article
-          class="producto"
-          *ngFor="let producto of (vista === 'inicio' ? catalogo : catalogoFiltrado)"
-        >
-          <img
-            class="producto-imagen"
-            [src]="producto.imagen"
-            [alt]="producto.nombre"
-            loading="lazy"
-          >
+        <article class="producto" *ngFor="let producto of (vista === 'inicio' ? catalogo : catalogoFiltrado)">
+          <img class="producto-imagen" [src]="producto.imagen" [alt]="producto.nombre" loading="lazy">
 
           <div class="producto-info">
             <span class="categoria">{{ producto.categoria }}</span>
@@ -139,10 +107,7 @@
         </article>
       </div>
 
-      <div
-        *ngIf="vista === 'productos' && catalogoFiltrado.length === 0"
-        class="sin-resultados"
-      >
+      <div *ngIf="vista === 'productos' && catalogoFiltrado.length === 0" class="sin-resultados">
         <h3>No encontramos productos</h3>
         <p>Prueba otra búsqueda o selecciona una categoría diferente.</p>
         <button class="boton primario" (click)="limpiarFiltros()">
@@ -179,11 +144,7 @@
 
           <article *ngFor="let item of carrito" class="carrito-producto">
             <div class="carrito-imagen-contenedor">
-              <img
-                class="carrito-imagen"
-                [src]="obtenerProducto(item.id)?.imagen"
-                [alt]="item.nombre"
-              >
+              <img class="carrito-imagen" [src]="obtenerProducto(item.id)?.imagen" [alt]="item.nombre">
             </div>
 
             <div class="carrito-detalles">
@@ -203,27 +164,18 @@
 
               <div class="carrito-controles">
                 <div class="carrito-cantidad">
-                  <button
-                    (click)="cambiarCantidad(item.id, -1)"
-                    aria-label="Disminuir cantidad"
-                  >
+                  <button (click)="cambiarCantidad(item.id, -1)" aria-label="Disminuir cantidad">
                     −
                   </button>
 
                   <span>{{ item.cantidad }}</span>
 
-                  <button
-                    (click)="cambiarCantidad(item.id, 1)"
-                    aria-label="Aumentar cantidad"
-                  >
+                  <button (click)="cambiarCantidad(item.id, 1)" aria-label="Aumentar cantidad">
                     +
                   </button>
                 </div>
 
-                <button
-                  class="carrito-eliminar"
-                  (click)="eliminarProducto(item.id)"
-                >
+                <button class="carrito-eliminar" (click)="eliminarProducto(item.id)">
                   Eliminar
                 </button>
               </div>
@@ -237,10 +189,7 @@
             </div>
           </article>
 
-          <button
-            class="boton secundario seguir-comprando"
-            (click)="irA('productos')"
-          >
+          <button class="boton secundario seguir-comprando" (click)="irA('productos')">
             ← Seguir comprando
           </button>
         </div>
@@ -268,11 +217,8 @@
               </strong>
             </div>
 
-            <button
-              class="boton primario finalizar-boton"
-              (click)="confirmarPedido()"
-              [disabled]="confirmandoPedido || carrito.length === 0"
-            >
+            <button class="boton primario finalizar-boton" (click)="confirmarPedido()"
+              [disabled]="confirmandoPedido || carrito.length === 0">
               {{ confirmandoPedido ? 'Registrando pedido...' : 'Confirmar pedido →' }}
             </button>
 
@@ -280,11 +226,7 @@
               Inicia sesión con Microsoft para registrar tu compra. El envío y el pago no están incluidos.
             </p>
 
-            <p
-              *ngIf="mensajePedido"
-              role="status"
-              [class.error]="!mensajePedido.includes('correctamente')"
-            >
+            <p *ngIf="mensajePedido" role="status" [class.error]="!mensajePedido.includes('correctamente')">
               {{ mensajePedido }}
             </p>
 
@@ -325,11 +267,7 @@
     <section *ngIf="vista === 'cuenta'" class="seccion estrecha">
       <h2>Mi cuenta y pedidos</h2>
 
-      <p
-        *ngIf="mensajePedido"
-        role="status"
-        [class.error]="!mensajePedido.includes('correctamente')"
-      >
+      <p *ngIf="mensajePedido" role="status" [class.error]="!mensajePedido.includes('correctamente')">
         {{ mensajePedido }}
       </p>
 
@@ -359,17 +297,12 @@
         </div>
 
         <div class="pestanas">
-          <button
-            [class.activo]="seccionCuenta === 'pedidos'"
-            (click)="seccionCuenta = 'pedidos'; consultarApi()"
-          >
+          <button [class.activo]="seccionCuenta === 'pedidos'" (click)="seccionCuenta = 'pedidos'; consultarApi()">
             Ver mis pedidos
           </button>
 
-          <button
-            [class.activo]="seccionCuenta === 'catalogo'"
-            (click)="seccionCuenta = 'catalogo'; consultarProductos()"
-          >
+          <button [class.activo]="seccionCuenta === 'catalogo'"
+            (click)="seccionCuenta = 'catalogo'; consultarProductos()">
             Consultar catálogo
           </button>
         </div>
@@ -447,7 +380,8 @@
                     <td>{{ producto.id ?? '—' }}</td>
                     <td>{{ producto.nombre ?? '—' }}</td>
                     <td>
-                      {{ producto.precio != null ? (producto.precio | currency:'CLP':'symbol-narrow':'1.0-0':'es-CL') : '—' }}
+                      {{ producto.precio != null ? (producto.precio | currency:'CLP':'symbol-narrow':'1.0-0':'es-CL') :
+                      '—' }}
                     </td>
                   </tr>
                 </tbody>
@@ -461,6 +395,112 @@
         </div>
       </div>
     </section>
+
+
+    <section *ngIf="vista === 'admin' && esAdmin" class="seccion estrecha">
+      <span class="etiqueta">ADMINISTRACIÓN</span>
+      <h2>Panel de administración</h2>
+      <p>Gestiona los productos de Pedidos360.</p>
+
+      <div class="panel">
+        <h3>{{ productoEditandoId === null ? 'Agregar producto' : 'Editar producto' }}</h3>
+
+        <form (ngSubmit)="guardarProductoAdmin()" #formAdmin="ngForm">
+          <div class="admin-campos">
+            <label>
+              Nombre del producto
+              <input type="text" name="nombre" [(ngModel)]="productoFormulario.nombre" required>
+            </label>
+
+            <label>
+              Precio en pesos chilenos
+              <input type="number" name="precio" [(ngModel)]="productoFormulario.precio" min="1" required>
+            </label>
+
+            <label>
+              Categoría
+              <select name="categoria" [(ngModel)]="productoFormulario.categoria" required>
+                <option value="Iluminación">Iluminación</option>
+                <option value="Decoración">Decoración</option>
+                <option value="Organización">Organización</option>
+                <option value="Textiles">Textiles</option>
+              </select>
+            </label>
+
+            <label>
+              Descripción
+              <textarea name="descripcion" [(ngModel)]="productoFormulario.descripcion" rows="3"></textarea>
+            </label>
+
+            <label>
+              Ruta o URL de imagen
+              <input type="text" name="imagen" [(ngModel)]="productoFormulario.imagen"
+                placeholder="assets/productos/lampara.jpg">
+            </label>
+          </div>
+
+          <div class="admin-acciones">
+            <button type="submit" class="boton primario" [disabled]="guardandoProducto || formAdmin.invalid">
+              {{ guardandoProducto ? 'Guardando...' : (productoEditandoId === null ? 'Agregar producto' : 'Guardar
+              cambios') }}
+            </button>
+
+            <button *ngIf="productoEditandoId !== null" type="button" class="boton secundario"
+              (click)="cancelarEdicionAdmin()">
+              Cancelar edición
+            </button>
+          </div>
+        </form>
+
+        <p *ngIf="mensajeAdmin" role="status">{{ mensajeAdmin }}</p>
+        <p *ngIf="errorAdmin" class="error" role="alert">{{ errorAdmin }}</p>
+      </div>
+
+      <div class="panel">
+        <h3>Productos registrados</h3>
+
+        <button class="boton secundario" (click)="consultarProductos()">
+          Actualizar listado
+        </button>
+
+        <p *ngIf="cargandoProductos">Cargando productos...</p>
+        <p *ngIf="errorProductos" class="error">{{ errorProductos }}</p>
+
+        <div *ngIf="productos && !cargandoProductos" class="tabla-scroll">
+          <table *ngIf="listaProductosApi.length">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let producto of listaProductosApi">
+                <td>{{ producto.id }}</td>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.precio | currency:'CLP':'symbol-narrow':'1.0-0':'es-CL' }}</td>
+                <td>
+                  <button class="boton secundario" (click)="editarProductoAdmin(producto)">
+                    Editar
+                  </button>
+                  <button class="boton secundario" (click)="eliminarProductoAdmin(producto.id)">
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p *ngIf="!listaProductosApi.length">
+            No hay productos registrados.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
   </main>
 
   <footer class="footer-tienda">
@@ -493,33 +533,17 @@
         <p>Estamos aquí para ayudarte.</p>
 
         <div class="footer-redes">
-          <a
-            href="https://web.whatsapp.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="footer-red-social"
-            aria-label="Abrir WhatsApp Web"
-          >
-            <img
-              src="https://cdn.jsdelivr.net/npm/simple-icons@v15/icons/whatsapp.svg"
-              alt="WhatsApp"
-              class="icono-red"
-            >
+          <a href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer" class="footer-red-social"
+            aria-label="Abrir WhatsApp Web">
+            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v15/icons/whatsapp.svg" alt="WhatsApp"
+              class="icono-red">
             WhatsApp
           </a>
 
-          <a
-            href="https://www.instagram.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="footer-red-social"
-            aria-label="Abrir Instagram"
-          >
-            <img
-              src="https://cdn.jsdelivr.net/npm/simple-icons@v15/icons/instagram.svg"
-              alt="Instagram"
-              class="icono-red"
-            >
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="footer-red-social"
+            aria-label="Abrir Instagram">
+            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v15/icons/instagram.svg" alt="Instagram"
+              class="icono-red">
             Instagram
           </a>
         </div>

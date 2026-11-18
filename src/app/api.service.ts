@@ -9,6 +9,15 @@ export interface NuevoPedido {
   total: number
 }
 
+export interface Producto {
+  id?: number
+  nombre: string
+  precio: number
+  categoria: string
+  descripcion: string
+  imagen: string
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -24,8 +33,8 @@ export class ApiService {
     )
   }
 
-  obtenerProductos(): Observable<any> {
-    return this.http.get(
+  obtenerProductos(): Observable<Producto[]> {
+    return this.http.get<Producto[]>(
       `${this.apiUrl}/api/productos`
     )
   }
@@ -34,6 +43,26 @@ export class ApiService {
     return this.http.post(
       `${this.apiUrl}/api/pedidos`,
       pedido
+    )
+  }
+
+  agregarProducto(producto: Producto): Observable<Producto> {
+    return this.http.post<Producto>(
+      `${this.apiUrl}/api/productos`,
+      producto
+    )
+  }
+
+  actualizarProducto(id: number, producto: Producto): Observable<Producto> {
+    return this.http.put<Producto>(
+      `${this.apiUrl}/api/productos/${id}`,
+      producto
+    )
+  }
+
+  eliminarProductoAdmin(id: number): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/api/productos/${id}`
     )
   }
 }
